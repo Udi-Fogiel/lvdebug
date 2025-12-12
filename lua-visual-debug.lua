@@ -98,6 +98,7 @@ local inner_keys = {
     },
     kern = {
         show = {scanner = scan_bool},
+        negative_color = {scanner = scan_string},
         color = {scanner = scan_string},
         width = {scanner = scan_float}
     },
@@ -118,7 +119,7 @@ local params = {
     rule = {show = true, color = "1 0 0 RG 1 0 0 rg", width = 0.4},
     disc = {show = true, color = "0 0 1 RG", width = 0.3},
     glue = {show = true, color = "", width = 0},
-    kern = {show = true, color = "", width = 0},
+    kern = {show = true, negative_color = "1 0 0 rg", color = "1 1 0 rg", width = 1},
     penalty = {show = true, color = "", width = 0},
     glyph = {show = true, color = "1 0 0 RG", width = 0.1},
 }
@@ -257,13 +258,15 @@ local function show_page_elements(parent)
 
     elseif head.id == KERN and params.kern.show then
       local rectangle = node.new("whatsit","pdf_literal")
-      local color = "1 1 0 rg"
-      if head.kern < 0 then color = "1 0 0 rg" end
+      local color = head.kern < 0 and params.kern.negative_color
+        or params.kern.color
       local k = math_round(head.kern / number_sp_in_a_pdf_point,2)
       if parent.id == HLIST then
-        rectangle.data = string.format("q %s 0 w 0 0 %g 1 re B Q",color, k )
+        rectangle.data = string.format("q %s 0 w 0 0 %g %g re B Q",
+          color, k, params.kern.width)
       else
-        rectangle.data = string.format("q %s 0 w 0 0  1 %g re B Q",color, -k )
+        rectangle.data = string.format("q %s 0 w 0 0 %g %g re B Q",
+          color, params.kern.width, -k)
       end
       parent.list = node.insert_before(parent.list,head,rectangle)
 
