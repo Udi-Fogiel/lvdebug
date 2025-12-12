@@ -110,7 +110,8 @@ local inner_keys = {
     glyph = {
         show = {scanner = scan_bool},
         color = {scanner = scan_string},
-        width = {scanner = scan_float}
+        width = {scanner = scan_float},
+        baseline = {scanner = scan_bool}
     },
 }
 local params = {
@@ -121,7 +122,7 @@ local params = {
     glue = {show = true, color = "", width = 0},
     kern = {show = true, negative_color = "1 0 0 rg", color = "1 1 0 rg", width = 1},
     penalty = {show = true, color = "", width = 0},
-    glyph = {show = true, color = "1 0 0 RG", width = 0.1},
+    glyph = {show = true, color = "1 0 0 RG", width = 0.1, baseline = true},
 }
 
 local function set_params(key)
@@ -282,14 +283,20 @@ local function show_page_elements(parent)
     
     elseif head.id == GLYPH and params.glyph.show then
       local rule_width = params.glyph.width
-      local wd = math_round(head.width                  / number_sp_in_a_pdf_point - rule_width     ,2)
+      local wd = -math_round(head.width                  / number_sp_in_a_pdf_point - rule_width     ,2)
       local ht = math_round((head.height + head.depth)  / number_sp_in_a_pdf_point - rule_width     ,2)
       local dp = math_round(head.depth                  / number_sp_in_a_pdf_point - rule_width / 2 ,2)
       local rectangle = node.new("whatsit", "pdf_literal")
       if curdir[#curdir] == "rtl" then wd = wd * -1 end
-      rectangle.data = string.format("q %s %g w %g %g %g %g re s Q",
-        params.glyph.color, rule_width, -rule_width / 2, -dp, wd, ht)
-      parent.list = node.insert_before(parent.list,head,rectangle)
+      local baseline = ""
+      if head.depth ~= 0 and params.glyph.baseline then
+        baseline = string.format("%g %g m %g 0 l",
+          -rule_width / 2, -rule_width / 2, wd)
+      end      
+      rectangle.data = string.format("q %s %g w %s %g %g %g %g re s Q",
+        params.glyph.color, rule_width, baseline, -rule_width / 2, -dp, wd, ht)
+      parent.list = node.insert_after(parent.list,head,rectangle)
+      head = head.next
     end
     
     if has_dir then
