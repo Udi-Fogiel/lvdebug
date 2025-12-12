@@ -63,6 +63,94 @@ local DISC = node.id("disc")
 local GLUE = node.id("glue")
 local KERN = node.id("kern")
 local PENALTY = node.id("penalty")
+local GLYPH = node.id("glyph")
+
+local keyval = require('luakeyval')
+local process_keys = keyval.process
+local scan_bool = keyval.bool
+local scan_string = token.scan_string
+local scan_float = token.scan_float
+local inner_keys = {
+    hlist = {
+        show = {scanner = scan_bool},
+        color = {scanner = scan_string},
+        width = {scanner = scan_float}
+    },
+    vlist = {
+        show = {scanner = scan_bool},
+        color = {scanner = scan_string},
+        width = {scanner = scan_float}
+    },
+    rule = {
+        show = {scanner = scan_bool},
+        color = {scanner = scan_string},
+        width = {scanner = scan_float}
+    },
+    disc = {
+        show = {scanner = scan_bool},
+        color = {scanner = scan_string},
+        width = {scanner = scan_float}
+    },
+    glue = {
+        show = {scanner = scan_bool},
+        color = {scanner = scan_string},
+        width = {scanner = scan_float}
+    },
+    kern = {
+        show = {scanner = scan_bool},
+        color = {scanner = scan_string},
+        width = {scanner = scan_float}
+    },
+    penalty = {
+        show = {scanner = scan_bool},
+        color = {scanner = scan_string},
+        width = {scanner = scan_float}
+    },
+    glyph = {
+        show = {scanner = scan_bool},
+        color = {scanner = scan_string},
+        width = {scanner = scan_float}
+    },
+}
+local params = {
+    hlist = {show = true, color = "0.5 G", width = 0.1},
+    vlist = {show = true, color = "0.1 G", width = 0.1},
+    rule = {show = true, color = "1 0 0 RG 1 0 0 rg", width = 0.4},
+    disc = {show = true, color = "0 0 1 RG", width = 0.3},
+    glue = {show = true, color = "", width = 0},
+    kern = {show = true, color = "", width = 0},
+    penalty = {show = true, color = "", width = 0},
+    glyph = {show = true, color = "1 0 0 RG", width = 0.1},
+}
+
+local function set_params(key)
+    local vals = process_keys(inner_keys[key])
+    for k,v in pairs(vals) do
+        params[key][k] = v
+    end
+end
+
+local outer_keys = {
+    hlist = {scanner = function() return true end, func = set_params},
+    vlist = {scanner = function() return true end, func = set_params},
+    rule = {scanner = function() return true end, func = set_params},
+    disc = {scanner = function() return true end, func = set_params},
+    glue = {scanner = function() return true end, func = set_params},
+    kern = {scanner = function() return true end, func = set_params},
+    penalty = {scanner = function() return true end, func = set_params},
+    glyph = {scanner = function() return true end, func = set_params},
+}
+
+do
+  if token.is_defined('lvdset') then
+      texio.write_nl('log', "lua-visual-debug: redefining \\lvdset")
+  end
+  local function_table = lua.get_functions_table()
+  local luafnalloc = luatexbase and luatexbase.new_luafunction 
+    and luatexbase.new_luafunction('lvdset') or #function_table + 1
+  token.set_lua('lvdset', luafnalloc)
+  function_table[luafnalloc] = function() return process_keys(outer_keys) end
+end
 
 local function math_round(num, idp)
   if idp and idp>0 then
@@ -76,7 +164,7 @@ local curdir = {}
 
 local show_page_elements
 
-function show_page_elements(parent)
+local function show_page_elements(parent)
   local head = parent.list
   while head do
     local has_dir = false
@@ -86,9 +174,11 @@ function show_page_elements(parent)
     elseif head.dir == "TRT" then
       table.insert(curdir,"rtl") has_dir=true
     end
-    if head.id == HLIST or head.id == VLIST then
+    if (head.id == HLIST and params.hlist.show) 
+      or (head.id == VLIST and params.vlist.show) then
 
-      local rule_width = 0.1
+      local rule_width = (head.id == HLIST) and params.hlist.width
+        or params.vlist.width
       local wd = math_round(head.width                  / number_sp_in_a_pdf_point - rule_width     ,2)
       local ht = math_round((head.height + head.depth)  / number_sp_in_a_pdf_point - rule_width     ,2)
       local dp = math_round(head.depth                  / number_sp_in_a_pdf_point - rule_width / 2 ,2)
@@ -98,28 +188,32 @@ function show_page_elements(parent)
       local rectangle = node.new("whatsit","pdf_literal")
       if curdir[#curdir] == "rtl" then wd = wd * -1 end
       if head.id == HLIST then -- hbox
-        rectangle.data = string.format("q 0.5 G %g w %g %g %g %g re s Q", rule_width, -rule_width / 2, -dp, wd, ht)
+        rectangle.data = string.format("q %s %g w %g %g %g %g re s Q", 
+          params.hlist.color, rule_width, -rule_width / 2, -dp, wd, ht)
       else
-        rectangle.data = string.format("q 0.1 G %g w %g %g %g %g re s Q", rule_width, -rule_width / 2, 0, wd, -ht)
+        rectangle.data = string.format("q %s %g w %g %g %g %g re s Q", 
+          params.vlist.color, rule_width, -rule_width / 2, 0, wd, -ht)
       end
       head.list = node.insert_before(head.list,head.list,rectangle)
 
 
-    elseif head.id == RULE then
+    elseif head.id == RULE and params.rule.show then
       local show_rule = node.new("whatsit","pdf_literal")
       if head.width == -1073741824 or head.height == -1073741824 or head.depth == -1073741824 then
         -- ignore for now -- these rules are stretchable
       else
         local dp = math_round( head.depth / number_sp_in_a_pdf_point  ,2)
         local ht = math_round( head.height / number_sp_in_a_pdf_point ,2)
-        show_rule.data =  string.format("q 1 0 0 RG 1 0 0 rg 0.4 w 0 %g m 0 %g l S Q",-dp,ht)
+        show_rule.data =  string.format("q %s %g w 0 %g m 0 %g l S Q",
+          params.rule.color, params.rule.width, -dp, ht)
       end
       parent.list = node.insert_before(parent.list,head,show_rule)
 
 
-    elseif head.id == DISC then
+    elseif head.id == DISC and params.disc.show then
       local hyphen_marker = node.new("whatsit","pdf_literal")
-      hyphen_marker.data = "q 0 0 1 RG 0.3 w 0 -1 m 0 0 l S Q"
+      hyphen_marker.data = string.format("q %s %g w 0 -1 m 0 0 l S Q",
+        params.disc.color, params.disc.width)
       parent.list = node.insert_before(parent.list,head,hyphen_marker)
 
     elseif head.id == DIR then
@@ -136,7 +230,7 @@ function show_page_elements(parent)
           end
       end
 
-  elseif head.id == GLUE then
+  elseif head.id == GLUE and params.penalty.show then
       local head_spec = head.spec
       if not head_spec then
         head_spec = head
@@ -161,7 +255,7 @@ function show_page_elements(parent)
       end
       parent.list = node.insert_before(parent.list,head,pdfstring)
 
-    elseif head.id == KERN then
+    elseif head.id == KERN and params.kern.show then
       local rectangle = node.new("whatsit","pdf_literal")
       local color = "1 1 0 rg"
       if head.kern < 0 then color = "1 0 0 rg" end
@@ -174,7 +268,7 @@ function show_page_elements(parent)
       parent.list = node.insert_before(parent.list,head,rectangle)
 
 
-    elseif head.id == PENALTY then
+    elseif head.id == PENALTY and params.penalty.show then
       local color = "1 g"
       local rectangle = node.new("whatsit","pdf_literal")
       if head.penalty < 10000 then
@@ -182,7 +276,19 @@ function show_page_elements(parent)
       end
       rectangle.data = string.format("q %s 0 w 0 0 1 1 re B Q",color)
       parent.list = node.insert_before(parent.list,head,rectangle)
+    
+    elseif head.id == GLYPH and params.glyph.show then
+      local rule_width = params.glyph.width
+      local wd = math_round(head.width                  / number_sp_in_a_pdf_point - rule_width     ,2)
+      local ht = math_round((head.height + head.depth)  / number_sp_in_a_pdf_point - rule_width     ,2)
+      local dp = math_round(head.depth                  / number_sp_in_a_pdf_point - rule_width / 2 ,2)
+      local rectangle = node.new("whatsit", "pdf_literal")
+      if curdir[#curdir] == "rtl" then wd = wd * -1 end
+      rectangle.data = string.format("q %s %g w %g %g %g %g re s Q",
+        params.glyph.color, rule_width, -rule_width / 2, -dp, wd, ht)
+      parent.list = node.insert_before(parent.list,head,rectangle)
     end
+    
     if has_dir then
       table.remove(curdir)
     end
