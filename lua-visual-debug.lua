@@ -128,6 +128,13 @@ local function set_params(key)
     end
 end
 
+local function onlyglyphs()
+    for _,v in pairs(params) do
+        v.show = false
+    end
+    params.glyph.show = true
+end
+
 local outer_keys = {
     hlist = {scanner = function() return true end, func = set_params},
     vlist = {scanner = function() return true end, func = set_params},
@@ -137,6 +144,7 @@ local outer_keys = {
     kern = {scanner = function() return true end, func = set_params},
     penalty = {scanner = function() return true end, func = set_params},
     glyph = {scanner = function() return true end, func = set_params},
+    onlyglyphs = {default = true, func = onlyglyphs}
 }
 
 do
