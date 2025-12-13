@@ -65,6 +65,12 @@ local KERN = node.id("kern")
 local PENALTY = node.id("penalty")
 local GLYPH = node.id("glyph")
 
+local fmt = string.format
+local floor = math.floor
+local insert = table.insert
+local insert_after = node.insert_after
+local insert_before = node.insert_before
+
 local running_glue_dimen = -2^30
 
 local params = {
@@ -81,9 +87,9 @@ local params = {
 local function math_round(num, idp)
   if idp and idp>0 then
     local mult = 10^idp
-    return math.floor(num * mult + 0.5) / mult
+    return floor(num * mult + 0.5) / mult
   end
-  return math.floor(num + 0.5)
+  return floor(num + 0.5)
 end
 
 local curdir = {}
@@ -95,10 +101,10 @@ local function show_page_elements(parent)
   while head do
     local has_dir = false
     if head.dir == "TLT" then
-      table.insert(curdir,"ltr")
+      insert(curdir,"ltr")
       has_dir=true
     elseif head.dir == "TRT" then
-      table.insert(curdir,"rtl") has_dir=true
+      insert(curdir,"rtl") has_dir=true
     end
     if head.id == HLIST or head.id == VLIST then
       local boxtype = node.type(head.id)
@@ -114,13 +120,13 @@ local function show_page_elements(parent)
         local factor = 1
         if curdir[#curdir] == "rtl" then factor = -1 end
         if head.id == HLIST then -- hbox
-          rectangle.data = string.format("q %s %g w %g %g %g %g re s Q", 
+          rectangle.data = fmt("q %s %g w %g %g %g %g re s Q", 
             params.hlist.color, rule_width, -factor*rule_width / 2, -dp, factor*wd, ht)
         else
-          rectangle.data = string.format("q %s %g w %g %g %g %g re s Q", 
+          rectangle.data = fmt("q %s %g w %g %g %g %g re s Q", 
             params.vlist.color, rule_width, -factor*rule_width / 2, 0, factor*wd, -ht)
         end
-        head.list = node.insert_before(head.list,head.list,rectangle)
+        head.list = insert_before(head.list,head.list,rectangle)
       end
 
     elseif head.id == RULE and params.rule.show then
@@ -130,17 +136,17 @@ local function show_page_elements(parent)
       else
         local dp = math_round( head.depth / number_sp_in_a_pdf_point  ,2)
         local ht = math_round( head.height / number_sp_in_a_pdf_point ,2)
-        show_rule.data =  string.format("q %s %g w 0 %g m 0 %g l S Q",
+        show_rule.data =  fmt("q %s %g w 0 %g m 0 %g l S Q",
           params.rule.color, params.rule.width, -dp, ht)
       end
-      parent.list = node.insert_before(parent.list,head,show_rule)
+      parent.list = insert_before(parent.list,head,show_rule)
 
 
     elseif head.id == DISC and params.disc.show then
       local hyphen_marker = node.new("whatsit","pdf_literal")
-      hyphen_marker.data = string.format("q %s %g w 0 -1 m 0 0 l S Q",
+      hyphen_marker.data = fmt("q %s %g w 0 -1 m 0 0 l S Q",
         params.disc.color, params.disc.width)
-      parent.list = node.insert_before(parent.list,head,hyphen_marker)
+      parent.list = insert_before(parent.list,head,hyphen_marker)
 
     elseif head.id == DIR then
       local mode = string.sub(head.dir,1,1)
@@ -148,15 +154,15 @@ local function show_page_elements(parent)
       local ldir
       if texdir == "TLT" then ldir = "ltr" else ldir = "rtl" end
       if mode == "+" then
-          table.insert(curdir,ldir)
+          insert(curdir,ldir)
       elseif mode == "-" then
           local x = table.remove(curdir)
           if x ~= ldir then
-              print(string.format("paragraph direction incorrect, found %s, expected %s",ldir,x))
+              print(fmt("paragraph direction incorrect, found %s, expected %s",ldir,x))
           end
       end
 
-  elseif head.id == GLUE and params.penalty.show then
+    elseif head.id == GLUE and params.penalty.show then
       local head_spec = head.spec
       if not head_spec then
         head_spec = head
@@ -175,11 +181,11 @@ local function show_page_elements(parent)
       if curdir[#curdir] == "rtl" then wd_bp = wd_bp * -1 end
 
       if parent.id == HLIST then
-        pdfstring.data = string.format("q %s [0.2] 0 d 0.5 w 0 0 m %g 0 l S Q", color, wd_bp)
+        pdfstring.data = fmt("q %s [0.2] 0 d 0.5 w 0 0 m %g 0 l S Q", color, wd_bp)
       else -- vlist
-        pdfstring.data = string.format("q 0.1 G 0.1 w -0.5 0 m 0.5 0 l -0.5 %g m 0.5 %g l S [0.2] 0 d  0.5 w 0.25 0  m 0.25 %g l S Q",-wd_bp,-wd_bp,-wd_bp)
+        pdfstring.data = fmt("q 0.1 G 0.1 w -0.5 0 m 0.5 0 l -0.5 %g m 0.5 %g l S [0.2] 0 d  0.5 w 0.25 0  m 0.25 %g l S Q",-wd_bp,-wd_bp,-wd_bp)
       end
-      parent.list = node.insert_before(parent.list,head,pdfstring)
+      parent.list = insert_before(parent.list,head,pdfstring)
 
     elseif head.id == KERN and params.kern.show then
       local rectangle = node.new("whatsit","pdf_literal")
@@ -187,23 +193,23 @@ local function show_page_elements(parent)
         or params.kern.color
       local k = math_round(head.kern / number_sp_in_a_pdf_point,2)
       if parent.id == HLIST then
-        rectangle.data = string.format("q %s 0 w 0 0 %g %g re B Q",
+        rectangle.data = fmt("q %s 0 w 0 0 %g %g re B Q",
           color, k, params.kern.width)
       else
-        rectangle.data = string.format("q %s 0 w 0 0 %g %g re B Q",
+        rectangle.data = fmt("q %s 0 w 0 0 %g %g re B Q",
           color, params.kern.width, -k)
       end
-      parent.list = node.insert_before(parent.list,head,rectangle)
+      parent.list = insert_before(parent.list,head,rectangle)
 
 
     elseif head.id == PENALTY and params.penalty.show then
       local color = "1 g"
       local rectangle = node.new("whatsit","pdf_literal")
       if head.penalty < 10000 then
-        color = string.format("%d g", 1 - math.floor(head.penalty / 10000))
+        color = fmt("%d g", 1 - floor(head.penalty / 10000))
       end
-      rectangle.data = string.format("q %s 0 w 0 0 1 1 re B Q",color)
-      parent.list = node.insert_before(parent.list,head,rectangle)
+      rectangle.data = fmt("q %s 0 w 0 0 1 1 re B Q",color)
+      parent.list = insert_before(parent.list,head,rectangle)
     
     elseif head.id == GLYPH and params.glyph.show then
       local rule_width = params.glyph.width
@@ -215,13 +221,12 @@ local function show_page_elements(parent)
       if curdir[#curdir] == "rtl" then factor = -1 end
       local baseline = ""
       if head.depth ~= 0 and params.glyph.baseline then
-        baseline = string.format("%g %g m %g %g l",
+        baseline = fmt("%g %g m %g %g l",
           0, -rule_width / 2, factor*(wd-rule_width), -rule_width / 2)
       end      
-      rectangle.data = string.format("q %s %g w %s %g %g %g %g re s Q",
+      rectangle.data = fmt("q %s %g w %s %g %g %g %g re s Q",
         params.glyph.color, rule_width, baseline, -factor*rule_width / 2, -dp, factor*wd, ht)
-      parent.list = node.insert_after(parent.list,head,rectangle)
-      head = head.next
+      parent.list, head = insert_after(parent.list,head,rectangle)
     end
     
     if has_dir then
