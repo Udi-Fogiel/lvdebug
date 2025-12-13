@@ -180,28 +180,27 @@ local function show_page_elements(parent)
     elseif head.dir == "TRT" then
       table.insert(curdir,"rtl") has_dir=true
     end
-    if (head.id == HLIST and params.hlist.show) 
-      or (head.id == VLIST and params.vlist.show) then
-
-      local rule_width = (head.id == HLIST) and params.hlist.width
-        or params.vlist.width
+    if head.id == HLIST or head.id == VLIST then
+      local boxtype = node.type(head.id)
+      local rule_width = params[boxtype].width
       local wd = math_round(head.width                  / number_sp_in_a_pdf_point - rule_width     ,2)
       local ht = math_round((head.height + head.depth)  / number_sp_in_a_pdf_point - rule_width     ,2)
       local dp = math_round(head.depth                  / number_sp_in_a_pdf_point - rule_width / 2 ,2)
 
       -- recurse into the contents of the box
       show_page_elements(head)
-      local rectangle = node.new("whatsit","pdf_literal")
-      if curdir[#curdir] == "rtl" then wd = wd * -1 end
-      if head.id == HLIST then -- hbox
-        rectangle.data = string.format("q %s %g w %g %g %g %g re s Q", 
-          params.hlist.color, rule_width, -rule_width / 2, -dp, wd, ht)
-      else
-        rectangle.data = string.format("q %s %g w %g %g %g %g re s Q", 
-          params.vlist.color, rule_width, -rule_width / 2, 0, wd, -ht)
+      if params[boxtype].show then
+        local rectangle = node.new("whatsit","pdf_literal")
+        if curdir[#curdir] == "rtl" then wd = wd * -1 end
+        if head.id == HLIST then -- hbox
+          rectangle.data = string.format("q %s %g w %g %g %g %g re s Q", 
+            params.hlist.color, rule_width, -rule_width / 2, -dp, wd, ht)
+        else
+          rectangle.data = string.format("q %s %g w %g %g %g %g re s Q", 
+            params.vlist.color, rule_width, -rule_width / 2, 0, wd, -ht)
+        end
+        head.list = node.insert_before(head.list,head.list,rectangle)
       end
-      head.list = node.insert_before(head.list,head.list,rectangle)
-
 
     elseif head.id == RULE and params.rule.show then
       local show_rule = node.new("whatsit","pdf_literal")
