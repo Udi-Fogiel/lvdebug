@@ -102,20 +102,21 @@ local function show_page_elements(parent)
       local boxtype = node.type(head.id)
       local rule_width = params[boxtype].width
       local wd = math_round(head.width                  / number_sp_in_a_pdf_point - rule_width     ,2)
-      local ht = math_round((head.height + head.depth)  / number_sp_in_a_pdf_point - rule_width     ,2)
+      local ht = math_round((head.height + head.depth)  / number_sp_in_a_pdf_point - rule_width / 2 ,2)
       local dp = math_round(head.depth                  / number_sp_in_a_pdf_point - rule_width / 2 ,2)
 
       -- recurse into the contents of the box
       show_page_elements(head)
       if params[boxtype].show then
         local rectangle = node.new("whatsit","pdf_literal")
-        if curdir[#curdir] == "rtl" then wd = wd * -1 end
+        local factor = 1
+        if curdir[#curdir] == "rtl" then factor = -1 end
         if head.id == HLIST then -- hbox
           rectangle.data = string.format("q %s %g w %g %g %g %g re s Q", 
-            params.hlist.color, rule_width, -rule_width / 2, -dp, wd, ht)
+            params.hlist.color, rule_width, -factor*rule_width / 2, -dp, factor*wd, ht)
         else
           rectangle.data = string.format("q %s %g w %g %g %g %g re s Q", 
-            params.vlist.color, rule_width, -rule_width / 2, 0, wd, -ht)
+            params.vlist.color, rule_width, -factor*rule_width / 2, 0, factor*wd, -ht)
         end
         head.list = node.insert_before(head.list,head.list,rectangle)
       end
@@ -204,18 +205,19 @@ local function show_page_elements(parent)
     
     elseif head.id == GLYPH and params.glyph.show then
       local rule_width = params.glyph.width
-      local wd = -math_round(head.width                  / number_sp_in_a_pdf_point - rule_width     ,2)
-      local ht = math_round((head.height + head.depth)  / number_sp_in_a_pdf_point - rule_width     ,2)
+      local wd = -math_round(head.width                 / number_sp_in_a_pdf_point - rule_width     ,2)
+      local ht = math_round((head.height + head.depth)  / number_sp_in_a_pdf_point - rule_width / 2 ,2)
       local dp = math_round(head.depth                  / number_sp_in_a_pdf_point - rule_width / 2 ,2)
       local rectangle = node.new("whatsit", "pdf_literal")
-      if curdir[#curdir] == "rtl" then wd = wd * -1 end
+      local factor = 1
+      if curdir[#curdir] == "rtl" then factor = -1 end
       local baseline = ""
       if head.depth ~= 0 and params.glyph.baseline then
         baseline = string.format("%g %g m %g %g l",
-          -rule_width / 2, -rule_width / 2, wd, -rule_width / 2)
+          0, -rule_width / 2, factor*(wd-rule_width), -rule_width / 2)
       end      
       rectangle.data = string.format("q %s %g w %s %g %g %g %g re s Q",
-        params.glyph.color, rule_width, baseline, -rule_width / 2, -dp, wd, ht)
+        params.glyph.color, rule_width, baseline, -factor*rule_width / 2, -dp, factor*wd, ht)
       parent.list = node.insert_after(parent.list,head,rectangle)
       head = head.next
     end
