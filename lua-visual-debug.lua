@@ -93,8 +93,6 @@ local inner_keys = {
     },
     glue = {
         show = {scanner = scan_bool},
-        color = {scanner = scan_string},
-        width = {scanner = scan_float}
     },
     kern = {
         show = {scanner = scan_bool},
@@ -104,8 +102,6 @@ local inner_keys = {
     },
     penalty = {
         show = {scanner = scan_bool},
-        color = {scanner = scan_string},
-        width = {scanner = scan_float}
     },
     glyph = {
         show = {scanner = scan_bool},
@@ -119,10 +115,10 @@ local params = {
     vlist = {show = true, color = "0.1 G", width = 0.1},
     rule = {show = true, color = "1 0 0 RG 1 0 0 rg", width = 0.4},
     disc = {show = true, color = "0 0 1 RG", width = 0.3},
-    glue = {show = true, color = "", width = 0},
+    glue = {show = true},
     kern = {show = true, negative_color = "1 0 0 rg", color = "1 1 0 rg", width = 1},
-    penalty = {show = true, color = "", width = 0},
-    glyph = {show = true, color = "1 0 0 RG", width = 0.1, baseline = true},
+    penalty = {show = true},
+    glyph = {show = false, color = "1 0 0 RG", width = 0.05, baseline = true},
 }
 
 local function set_params(key)
@@ -290,8 +286,8 @@ local function show_page_elements(parent)
       if curdir[#curdir] == "rtl" then wd = wd * -1 end
       local baseline = ""
       if head.depth ~= 0 and params.glyph.baseline then
-        baseline = string.format("%g %g m %g 0 l",
-          -rule_width / 2, -rule_width / 2, wd)
+        baseline = string.format("%g %g m %g %g l",
+          -rule_width / 2, -rule_width / 2, wd, -rule_width / 2)
       end      
       rectangle.data = string.format("q %s %g w %s %g %g %g %g re s Q",
         params.glyph.color, rule_width, baseline, -rule_width / 2, -dp, wd, ht)
