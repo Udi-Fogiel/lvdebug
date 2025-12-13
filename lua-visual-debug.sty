@@ -14,7 +14,9 @@
 \ifx\ProvidesPackage\undefined
   \ifluatex
    \input atbegshi.sty\relax
-   \directlua{ lvd = require("lua-visual-debug")}
+   \directlua{
+     require("lua-visual-debug-keys")   
+     lvd = require("lua-visual-debug")}
    \AtBeginShipout {\directlua{lvd.show_page_elements(tex.box["AtBeginShipoutBox"])}}%
    \AtBeginShipoutInit
   \else
@@ -23,6 +25,7 @@
 \else
   \ifluatex
     \directlua{
+      require("lua-visual-debug-keys")
       local lvd = require("lua-visual-debug")
       luatexbase.add_to_callback('pre_shipout_filter', lvd.show_page_elements, 'lvd')
     }
