@@ -24,7 +24,7 @@
 -- There are 65782 scaled points in a PDF point
 -- Therefore we need to divide all TeX lengths by
 -- this amount to get the PDF points.
-local number_sp_in_a_pdf_point = 65782
+local number_sp_in_a_pdf_point = tex.sp('1bp')
 
 
 -- The idea is the following: at page shipout, all elements on a page are fixed.
@@ -64,6 +64,8 @@ local GLUE = node.id("glue")
 local KERN = node.id("kern")
 local PENALTY = node.id("penalty")
 local GLYPH = node.id("glyph")
+
+local running_glue_dimen = -2^30
 
 local params = {
     hlist = {show = true, color = "0.5 G", width = 0.1},
@@ -123,7 +125,7 @@ local function show_page_elements(parent)
 
     elseif head.id == RULE and params.rule.show then
       local show_rule = node.new("whatsit","pdf_literal")
-      if head.width == -1073741824 or head.height == -1073741824 or head.depth == -1073741824 then
+      if head.width == running_glue_dimen or head.height == running_glue_dimen or head.depth == running_glue_dimen then
         -- ignore for now -- these rules are stretchable
       else
         local dp = math_round( head.depth / number_sp_in_a_pdf_point  ,2)
