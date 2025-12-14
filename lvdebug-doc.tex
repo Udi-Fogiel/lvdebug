@@ -117,6 +117,7 @@ must be enclosed in curly braces, e.g., \verb|\lvdset{glyph={color={1 0 0 RG}}}|
 \begin{itemize}
 \item The \texttt{kern} key uses both stroke and fill colors, unlike other keys which only use stroking color.
 \item The \texttt{onlyglyphs} key is a boolean flag (no value needed) that sets all \texttt{show} keys to \texttt{false} except \texttt{glyph/show}, which is set to \texttt{true}.
+\item The \texttt{opacity} key applies to all node types. For fine-tuned opacity control per node type, the \texttt{color} keys can be (ab)used to include graphics state operators.
 \end{itemize}
 
 \section{Copying}

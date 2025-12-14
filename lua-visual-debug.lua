@@ -81,7 +81,7 @@ local params = {
     glue = {show = true},
     kern = {show = true, negative_color = "1 0 0 rg", color = "1 1 0 rg", width = 1},
     penalty = {show = true},
-    glyph = {show = false, color = "1 0 0 RG", width = 0.05, baseline = true},
+    glyph = {show = false, color = "1 0 0 RG", width = 0.1, baseline = true},
     opacity = ""
 }
 
