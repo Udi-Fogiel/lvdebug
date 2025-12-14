@@ -46,8 +46,15 @@ local inner_keys = {
     },
 }
 
+local messages = {
+    error1 = "lua-visual-debug: Wrong syntax in \\lvdset",
+    value_forbidden = 'lua-visual-debug: The key "%s" does not accept a value',
+    value_required = 'lua-visual-debug: The key "%s" requires a value',
+}
+
+
 local function set_params(key)
-    local vals = process_keys(inner_keys[key])
+    local vals = process_keys(inner_keys[key],messages)
     for k,v in pairs(vals) do
         params[key][k] = v
     end
@@ -84,7 +91,7 @@ do
     and luatexbase.new_luafunction('lvdset') or #function_table + 1
   token.set_lua('lvdset', luafnalloc)
   function_table[luafnalloc] = function() 
-      local vals = process_keys(outer_keys)
+      local vals = process_keys(outer_keys,messages)
       params.opacity = vals.opacity or params.opacity
   end
 end
