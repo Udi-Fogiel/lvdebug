@@ -1,5 +1,5 @@
 \documentclass{article}
-\usepackage{graphicx,listings,lmodern,luatextra}
+\usepackage{graphicx,listings,lmodern,luatextra,booktabs}
 \newcommand\pkgversion{see Makefile}
 
 \newcommand*\pgsmall{\fontsize{8.5}{8.7}\selectfont\ttfamily}
@@ -47,7 +47,7 @@ When you load the package \texttt{lua-visual-debug} in your \LuaLaTeX\ document 
 
 \noindent\includegraphics[width=.9\textwidth]{lvdebugdetail1-num}
 \begin{enumerate}
-	\item A vertical glue. Beginning and end are marked with a small tick. At the mark 1, two vertical glues are connected.
+\item A vertical glue. Beginning and end are marked with a small tick. At the mark 1, two vertical glues are connected.
 \item A horizontal glue. Blue dashed lines represent stretched glues, magenta lines represent shrunk glues, gray at their natural width.
 \item A negative kern. Positive kerns are yellow.
 \item A possible hyphenation point.
@@ -61,6 +61,60 @@ A strut box (zero width box) is marked with a red rule:
 
 % section how_to_interpret_the_ (end)
 
+\newpage
+
+\section{Configuration}
+The \verb|\lvdset| macro modifies the markers described in Section~\ref{sec:how_to_interpret_the_markers}.
+It accepts a list of space-separated \texttt{key/val} pairs. Most keys accept nested \texttt{key/val} pairs 
+enclosed in curly braces.
+
+\medskip
+\noindent
+\begin{tabular}{@{}lllp{6cm}@{}}
+\toprule
+\textbf{Key} & \textbf{Sub-key} & \textbf{Default} & \textbf{Description} \\
+\midrule
+\texttt{hlist} & \texttt{show} & \texttt{true} & Whether to mark hlists \\
+               & \texttt{color} & \texttt{0.5 G} & PDF stroking color operator \\
+               & \texttt{width} & \texttt{0.1} & Line width in bp units \\
+\midrule
+\texttt{vlist} & \texttt{show} & \texttt{true} & Whether to mark vlists \\
+               & \texttt{color} & \texttt{0.1 G} & PDF stroking color operator \\
+               & \texttt{width} & \texttt{0.1} & Line width in bp units \\
+\midrule
+\texttt{rule} & \texttt{show} & \texttt{true} & Whether to mark rules \\
+              & \texttt{color} & \texttt{1 0 0 RG 1 0 0 rg} & PDF stroking color operator \\
+              & \texttt{width} & \texttt{0.4} & Line width in bp units \\
+\midrule
+\texttt{disc} & \texttt{show} & \texttt{true} & Whether to mark discretionaries \\
+              & \texttt{color} & \texttt{0 0 1 RG} & PDF stroking color operator \\
+              & \texttt{width} & \texttt{0.3} & Line width in bp units \\
+\midrule
+\texttt{glue} & \texttt{show} & \texttt{true} & Whether to mark glue \\
+\midrule
+\texttt{kern} & \texttt{show} & \texttt{true} & Whether to mark kerns \\
+              & \texttt{color} & \texttt{1 1 0 rg} & PDF color for positive kerns (stroke and fill) \\
+              & \texttt{negative\_color} & \texttt{1 0 0 rg} & PDF color for negative kerns (stroke and fill) \\
+              & \texttt{width} & \texttt{1} & Line width in bp units \\
+\midrule
+\texttt{penalty} & \texttt{show} & \texttt{true} & Whether to mark penalties \\
+\midrule
+\texttt{glyph} & \texttt{show} & \texttt{false} & Whether to mark glyphs \\
+               & \texttt{color} & \texttt{1 0 0 RG} & PDF stroking color operator \\
+               & \texttt{width} & \texttt{0.05} & Line width in bp units \\
+               & \texttt{baseline} & \texttt{true} & Whether to mark the baseline \\
+\midrule
+\texttt{onlyglyphs} & — & — & Shortcut to disable all markers except glyphs \\
+\bottomrule
+\end{tabular}
+
+\medskip
+\noindent
+\textit{Notes:} 
+\begin{itemize}
+\item The \texttt{kern} key uses both stroke and fill colors, unlike other keys which only use stroking color.
+\item The \texttt{onlyglyphs} key is a boolean flag (no value needed) that sets all \texttt{show} keys to \texttt{false} except \texttt{glyph/show}, which is set to \texttt{true}.
+\end{itemize}
 
 \section{Copying}
 
