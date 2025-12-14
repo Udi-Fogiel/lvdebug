@@ -55,7 +55,9 @@ end
 
 local function onlyglyphs()
     for _,v in pairs(params) do
-        v.show = false
+        if v.show then 
+            v.show = false
+        end
     end
     params.glyph.show = true
 end
@@ -69,6 +71,7 @@ local outer_keys = {
     kern = {scanner = function() return true end, func = set_params},
     penalty = {scanner = function() return true end, func = set_params},
     glyph = {scanner = function() return true end, func = set_params},
+    opacity = {scanner = scan_string},
     onlyglyphs = {default = true, func = onlyglyphs}
 }
 
@@ -80,5 +83,8 @@ do
   local luafnalloc = luatexbase and luatexbase.new_luafunction 
     and luatexbase.new_luafunction('lvdset') or #function_table + 1
   token.set_lua('lvdset', luafnalloc)
-  function_table[luafnalloc] = function() return process_keys(outer_keys) end
+  function_table[luafnalloc] = function() 
+      local vals = process_keys(outer_keys)
+      params.opacity = vals.opacity or params.opacity
+  end
 end

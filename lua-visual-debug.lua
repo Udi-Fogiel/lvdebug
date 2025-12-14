@@ -82,6 +82,7 @@ local params = {
     kern = {show = true, negative_color = "1 0 0 rg", color = "1 1 0 rg", width = 1},
     penalty = {show = true},
     glyph = {show = false, color = "1 0 0 RG", width = 0.05, baseline = true},
+    opacity = ""
 }
 
 local function math_round(num, idp)
@@ -120,11 +121,11 @@ local function show_page_elements(parent)
         local factor = 1
         if curdir[#curdir] == "rtl" then factor = -1 end
         if head.id == HLIST then -- hbox
-          rectangle.data = fmt("q %s %g w %g %g %g %g re s Q", 
-            params.hlist.color, rule_width, -factor*rule_width / 2, -dp, factor*wd, ht)
+          rectangle.data = fmt("q %s %s %g w %g %g %g %g re s Q", 
+            params.opacity,params.hlist.color, rule_width, -factor*rule_width / 2, -dp, factor*wd, ht)
         else
-          rectangle.data = fmt("q %s %g w %g %g %g %g re s Q", 
-            params.vlist.color, rule_width, -factor*rule_width / 2, 0, factor*wd, -ht)
+          rectangle.data = fmt("q %s %s %g w %g %g %g %g re s Q", 
+            params.opacity,params.vlist.color, rule_width, -factor*rule_width / 2, 0, factor*wd, -ht)
         end
         head.list = insert_before(head.list,head.list,rectangle)
       end
@@ -136,16 +137,16 @@ local function show_page_elements(parent)
       else
         local dp = math_round( head.depth / number_sp_in_a_pdf_point  ,2)
         local ht = math_round( head.height / number_sp_in_a_pdf_point ,2)
-        show_rule.data =  fmt("q %s %g w 0 %g m 0 %g l S Q",
-          params.rule.color, params.rule.width, -dp, ht)
+        show_rule.data =  fmt("q %s %s %g w 0 %g m 0 %g l S Q",
+          params.opacity,params.rule.color, params.rule.width, -dp, ht)
       end
       parent.list = insert_before(parent.list,head,show_rule)
 
 
     elseif head.id == DISC and params.disc.show then
       local hyphen_marker = node.new("whatsit","pdf_literal")
-      hyphen_marker.data = fmt("q %s %g w 0 -1 m 0 0 l S Q",
-        params.disc.color, params.disc.width)
+      hyphen_marker.data = fmt("q %s %s %g w 0 -1 m 0 0 l S Q",
+        params.opacity,params.disc.color, params.disc.width)
       parent.list = insert_before(parent.list,head,hyphen_marker)
 
     elseif head.id == DIR then
@@ -193,11 +194,11 @@ local function show_page_elements(parent)
         or params.kern.color
       local k = math_round(head.kern / number_sp_in_a_pdf_point,2)
       if parent.id == HLIST then
-        rectangle.data = fmt("q %s 0 w 0 0 %g %g re B Q",
-          color, k, params.kern.width)
+        rectangle.data = fmt("q %s %s 0 w 0 0 %g %g re B Q",
+          params.opacity, color, k, params.kern.width)
       else
-        rectangle.data = fmt("q %s 0 w 0 0 %g %g re B Q",
-          color, params.kern.width, -k)
+        rectangle.data = fmt("q %s %s 0 w 0 0 %g %g re B Q",
+          params.opacity, color, params.kern.width, -k)
       end
       parent.list = insert_before(parent.list,head,rectangle)
 
@@ -224,8 +225,8 @@ local function show_page_elements(parent)
         baseline = fmt("%g %g m %g %g l",
           0, -rule_width / 2, factor*(wd-rule_width), -rule_width / 2)
       end      
-      rectangle.data = fmt("q %s %g w %s %g %g %g %g re s Q",
-        params.glyph.color, rule_width, baseline, -factor*rule_width / 2, -dp, factor*wd, ht)
+      rectangle.data = fmt("q %s %s %g w %s %g %g %g %g re s Q",
+        params.opacity, params.glyph.color, rule_width, baseline, -factor*rule_width / 2, -dp, factor*wd, ht)
       parent.list, head = insert_after(parent.list,head,rectangle)
     end
     

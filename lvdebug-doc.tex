@@ -66,7 +66,8 @@ A strut box (zero width box) is marked with a red rule:
 \section{Configuration}
 The \verb|\lvdset| macro modifies the markers described in Section~\ref{sec:how_to_interpret_the_markers}.
 It accepts a list of space-separated \texttt{key/val} pairs. Most keys accept nested \texttt{key/val} pairs 
-enclosed in curly braces.
+enclosed in curly braces. PDF operators (for \texttt{color}, \texttt{negative\_color}, and \texttt{opacity}) 
+must be enclosed in curly braces, e.g., \verb|\lvdset{glyph={color={1 0 0 RG}}}|.
 
 \medskip
 \noindent
@@ -105,6 +106,8 @@ enclosed in curly braces.
                & \texttt{baseline} & \texttt{true} & Whether to mark the baseline \\
 \midrule
 \texttt{onlyglyphs} & — & — & Shortcut to disable all markers except glyphs \\
+\midrule
+\texttt{opacity} & — & (empty) & PDF graphics state operator for transparency \\
 \bottomrule
 \end{tabular}
 
