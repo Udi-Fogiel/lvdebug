@@ -76,7 +76,7 @@ local running_glue_dimen = -2^30
 local params = {
     hlist = {show = true, color = "0.5 G", width = 0.1},
     vlist = {show = true, color = "0.1 G", width = 0.1},
-    rule = {show = true, color = "1 0 0 RG 1 0 0 rg", width = 0.4},
+    rule = {show = true, color = "1 0 0 RG", width = 0.4},
     disc = {show = true, color = "0 0 1 RG", width = 0.3},
     glue = {show = true},
     kern = {show = true, negative_color = "1 0 0 rg", color = "1 1 0 rg", width = 1},
