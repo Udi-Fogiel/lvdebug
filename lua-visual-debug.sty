@@ -11,27 +11,26 @@
   \RequirePackage{ifluatex}
 \fi
 
-\def\luavisualdebug@dothings{%
-  \directlua{ lvd = require("lua-visual-debug")}%
-  \AtBeginShipout {\directlua{lvd.show_page_elements(tex.box["AtBeginShipoutBox"])}}%
-}
-
 \ifx\ProvidesPackage\undefined
   \ifluatex
    \input atbegshi.sty\relax
-   \luavisualdebug@dothings
+   \directlua{
+     require("lua-visual-debug-keys")   
+     lvd = require("lua-visual-debug")}
+   \AtBeginShipout {\directlua{lvd.show_page_elements(tex.box["AtBeginShipoutBox"])}}%
    \AtBeginShipoutInit
   \else
     \message{Warning: lua-visual-debug only works with LuaTeX (plain and LaTeX format)}
   \fi
 \else
   \ifluatex
-    \RequirePackage{atbegshi}
-    \luavisualdebug@dothings
+    \directlua{
+      require("lua-visual-debug-keys")
+      local lvd = require("lua-visual-debug")
+      luatexbase.add_to_callback('pre_shipout_filter', lvd.show_page_elements, 'lvd')
+    }
   \else
     \PackageWarning{lua-visual-debug}{You are using this package without LuaTeX. This is not supported, so you don't get any visual debugging.}
   \fi
 \fi
-
-
 
