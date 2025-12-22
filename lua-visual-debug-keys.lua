@@ -31,12 +31,13 @@ local inner_keys = {
     },
     kern = {
         show = {scanner = scan_bool},
-        negative_color = {scanner = scan_string},
+        negativecolor = {scanner = scan_string},
         color = {scanner = scan_string},
         width = {scanner = scan_float}
     },
     penalty = {
         show = {scanner = scan_bool},
+        colorfunc = {scanner = scan_string},
     },
     glyph = {
         show = {scanner = scan_bool},
@@ -69,6 +70,19 @@ local function onlyglyphs()
     params.glyph.show = true
 end
 
+local function set_penalty()
+    local vals = process_keys(inner_keys.penalty,messages)
+    params.penalty.show = vals.show ~= nil and vals.show or params.penalty.show
+    if vals.colorfunc then
+        local func, err = load("return " .. vals.colorfunc)
+        if func then
+            params.penalty.colorfunc = func()
+        else
+            texio.write_nl('log', "lua-visual-debug: error in colorfunc: " .. err)
+        end
+    end
+end
+
 local outer_keys = {
     hlist = {scanner = function() return true end, func = set_params},
     vlist = {scanner = function() return true end, func = set_params},
@@ -76,7 +90,7 @@ local outer_keys = {
     disc = {scanner = function() return true end, func = set_params},
     glue = {scanner = function() return true end, func = set_params},
     kern = {scanner = function() return true end, func = set_params},
-    penalty = {scanner = function() return true end, func = set_params},
+    penalty = {scanner = function() return true end, func = set_penalty},
     glyph = {scanner = function() return true end, func = set_params},
     opacity = {scanner = scan_string},
     onlyglyphs = {default = true, func = onlyglyphs}

@@ -99,6 +99,7 @@ must be enclosed in curly braces, e.g., \verb|\lvdset{glyph={color={1 0 0 RG}}}|
               & \texttt{width} & \texttt{1} & Line width in bp units \\
 \midrule
 \texttt{penalty} & \texttt{show} & \texttt{true} & Whether to mark penalties \\
+                 & \texttt{colorfunc} & (see below) & Lua function that accepts the penalty value and returns a PDF color string \\
 \midrule
 \texttt{glyph} & \texttt{show} & \texttt{false} & Whether to mark glyphs \\
                & \texttt{color} & \texttt{1 0 0 RG} & PDF stroking color operator \\
@@ -119,6 +120,19 @@ must be enclosed in curly braces, e.g., \verb|\lvdset{glyph={color={1 0 0 RG}}}|
 \item The \texttt{onlyglyphs} key is a boolean flag (no value needed) that sets all \texttt{show} keys to \texttt{false} except \texttt{glyph/show}, which is set to \texttt{true}.
 \item The \texttt{opacity} key applies to all node types. For fine-tuned opacity control per node type, the \texttt{color} keys can be (ab)used to include graphics state operators.
 \end{itemize}
+
+\medskip
+\noindent
+The default \texttt{colorfunc} for penalties is:
+\begin{verbatim}
+function(p) 
+  local color = "1 g" 
+  if p < 10000 then
+    color = string.format("%g g", 1 - math.floor(p / 10000))
+  end
+  return color
+end
+\end{verbatim}
 
 \section{Copying}
 

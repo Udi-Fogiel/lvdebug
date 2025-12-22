@@ -79,8 +79,9 @@ local params = {
     rule = {show = true, color = "1 0 0 RG", width = 0.4},
     disc = {show = true, color = "0 0 1 RG", width = 0.3},
     glue = {show = true},
-    kern = {show = true, negative_color = "1 0 0 rg", color = "1 1 0 rg", width = 1},
-    penalty = {show = true},
+    kern = {show = true, negativecolor = "1 0 0 rg", color = "1 1 0 rg", width = 1},
+    penalty = {show = true, colorfunc = function(p) local color = "1 g" if p < 10000 then
+        color = fmt("%d g", 1 - floor(p / 10000)) end return color end},
     glyph = {show = false, color = "1 0 0 RG", width = 0.1, baseline = true},
     opacity = ""
 }
@@ -190,7 +191,7 @@ local function show_page_elements(parent)
 
     elseif head.id == KERN and params.kern.show then
       local rectangle = node.new("whatsit","pdf_literal")
-      local color = head.kern < 0 and params.kern.negative_color
+      local color = head.kern < 0 and params.kern.negativecolor
         or params.kern.color
       local k = math_round(head.kern / number_sp_in_a_pdf_point,2)
       if parent.id == HLIST then
@@ -204,11 +205,9 @@ local function show_page_elements(parent)
 
 
     elseif head.id == PENALTY and params.penalty.show then
-      local color = "1 g"
+    -- maybe add a default vlaue in case the function returns nil?
+      local color = params.penalty.colorfunc(head.penalty)
       local rectangle = node.new("whatsit","pdf_literal")
-      if head.penalty < 10000 then
-        color = fmt("%d g", 1 - floor(head.penalty / 10000))
-      end
       rectangle.data = fmt("q %s 0 w 0 0 1 1 re B Q",color)
       parent.list = insert_before(parent.list,head,rectangle)
     
