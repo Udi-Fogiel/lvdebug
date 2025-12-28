@@ -1,6 +1,8 @@
 \documentclass{article}
-\usepackage{graphicx,listings,lmodern,luatextra,booktabs}
+\usepackage{graphicx,listings,booktabs,lmodern}
 \newcommand\pkgversion{see Makefile}
+\DeclareDocumentCommand\LuaLaTeX{}{Lua\LaTeX}
+\DeclareDocumentCommand\LuaTeX{}{Lua\TeX}
 
 \newcommand*\pgsmall{\fontsize{8.5}{8.7}\selectfont\ttfamily}
 \lstset{basicstyle=\pgsmall,
@@ -32,7 +34,7 @@ When you load the package \texttt{lua-visual-debug} in your \LuaLaTeX\ document 
 
 \noindent yields \vspace{5mm}
 
-\noindent \includegraphics[width=\textwidth]{sample-crop.pdf}
+\noindent \includegraphics[width=\textwidth]{sample.pdf}
 
 \section{A plain \TeX\ example}
 
@@ -40,7 +42,7 @@ When you load the package \texttt{lua-visual-debug} in your \LuaLaTeX\ document 
 
 \noindent yields \vspace{5mm}
 
-\noindent \includegraphics{sample-plain-crop.pdf}
+\noindent \includegraphics[width=\textwidth]{sample-plain.pdf}
 
 \section{How to interpret the markers} % (fold)
 \label{sec:how_to_interpret_the_markers}
