@@ -72,7 +72,9 @@ end
 
 local function set_penalty()
     local vals = process_keys(inner_keys.penalty,messages)
-    params.penalty.show = vals.show ~= nil and vals.show or params.penalty.show
+    if vals.show ~= nil then
+        params.penalty.show = vals.show
+    end
     if vals.colorfunc then
         local func, err = load("return " .. vals.colorfunc)
         if func then
