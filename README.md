@@ -20,11 +20,11 @@ Requirements: The package has only been tested with LuaTeX and
   but other engines only show a warning message.
 
 
-Copyright 2012–2023 Patrick Gundlach (<patrick@gundla.ch>) and others (see Git information)
+Copyright 2012–2026 Patrick Gundlach (<patrick@gundla.ch>) and others (see Git information)
 
-Package version: see Makefile
+Package version: 2025-12-25 v1.0
 
-Public repository: <https://github.com/pgundlach/lvdebug>
+Public repository: <https://github.com/Udi-Fogiel/lvdebug>
 
 Licensed under the MIT license. See the Lua file for details.
 

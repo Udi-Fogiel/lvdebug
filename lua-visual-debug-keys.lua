@@ -1,3 +1,7 @@
+-- see lua-visual-debug.lua file for copyright information (MIT License)
+-- Public repository:
+-- https://github.com/Udi-Fogiel/lvdebug (issues/pull requests,...) Version: V1.0, 2025-12-25
+
 local lvd = require('lua-visual-debug')
 local params = lvd.params
 local keyval = require('luakeyval')

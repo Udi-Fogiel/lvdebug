@@ -1,7 +1,8 @@
--- Copyright 2012-2023 Patrick Gundlach, patrick@gundla.ch Public repository:
--- https://github.com/pgundlach/lvdebug (issues/pull requests,...) Version: see
--- Makefile
-
+-- Copyright 2012-2026 Patrick Gundlach, patrick@gundla.ch
+-- Copyright 2025-2026 Udi Fogiel, udi@udifogiel.com
+-- Public repository:
+-- https://github.com/Udi-Fogiel/lvdebug (issues/pull requests,...) Version: V1.0, 2025-12-25
+--
 -- Permission is hereby granted, free of charge, to any person obtaining a copy
 -- of this software and associated documentation files (the "Software"), to deal
 -- in the Software without restriction, including without limitation the rights
