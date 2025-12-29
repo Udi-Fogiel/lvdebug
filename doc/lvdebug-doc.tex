@@ -1,7 +1,5 @@
 \documentclass{article}
 \usepackage{graphicx,listings,booktabs,lmodern}
-\DeclareDocumentCommand\LuaLaTeX{}{Lua\LaTeX}
-\DeclareDocumentCommand\LuaTeX{}{Lua\TeX}
 
 \newcommand*\pgsmall{\fontsize{8.5}{8.7}\selectfont\ttfamily}
 \lstset{basicstyle=\pgsmall,
@@ -22,11 +20,16 @@
 \tableofcontents
 \section{About}
 
-This package aids debugging your \TeX\ and \LaTeX\ document by drawing rectangles around boxes and rules where glue is inserted. Other items are marked as well: kerns, hyphenation points and penalties.
+This package aids debugging your \TeX\ and \LaTeX\ document by drawing 
+rectangles around boxes and rules where glue is inserted.
+Other items are marked as well: kerns, hyphenation points and penalties.
 
 \section{How to use}
 
-When you load the package \texttt{lua-visual-debug} in your \LuaLaTeX\ document (or use \verb|\input lua-visual-debug.sty| in plain \TeX), \LuaTeX\ will highlight boxes, penalties, glues and kerns in the PDF. This package requires you to process the document with \LuaTeX\ (plain and \LaTeX formats).
+When you load the package \texttt{lua-visual-debug} in your Lua\LaTeX\ document 
+(or use \verb|\input lua-visual-debug.sty| in plain \TeX, or \verb|\load[lua-visual-debug]| in OP\TeX),
+Lua\TeX\ will highlight boxes, penalties, glues and kerns in the PDF.
+This package requires you to process the document with Lua\TeX\ (plain, \LaTeX or OP\TeX formats).
 
 \section{A \LaTeX\ example}
 \lstinputlisting[language=tex]{sample.tex}
