@@ -38,8 +38,8 @@ tagfiles = {"*.opm", "*.sty", "*.lua", "doc/lvdebug-doc.tex", "*.md"}
 function update_tag(file,content,tagname,tagdate)
   if string.match(file, "%.opm$") then
     return string.gsub(content,
-      "version {%d+%.%d+, %d%d%d%d%-%d%d%-%d%d",
-      "version {" .. tagname .. ", " .. tagdate)
+      "Visual debugging <%d+%.%d+, %d%d%d%d%-%d%d%-%d%d>",
+      "Visual debugging <" .. tagname .. ", " .. tagdate .. ">")
   elseif string.match(file, "%.lua$") then
     return string.gsub(content,
       "Version: V%d+%.%d+, %d%d%d%d%-%d%d%-%d%d",

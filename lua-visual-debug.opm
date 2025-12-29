@@ -1,0 +1,10 @@
+
+\_codedecl \lvdset {Visual debugging <1.0, 2025-12-29>}
+
+\_directlua{
+  require("lua-visual-debug-keys")
+  local lvd = require("lua-visual-debug")
+  callback.add_to_callback('pre_shipout_filter', lvd.show_page_elements, 'lvd')
+}
+
+\_endcode

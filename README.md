@@ -22,7 +22,7 @@ Requirements: The package has only been tested with LuaTeX and
 
 Copyright 2012–2026 Patrick Gundlach (<patrick@gundla.ch>) and others (see Git information)
 
-Package version: 2025-12-25 v1.0
+Package version: 2025-12-29 v1.0
 
 Public repository: <https://github.com/Udi-Fogiel/lvdebug>
 
