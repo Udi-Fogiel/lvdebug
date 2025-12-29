@@ -1,0 +1,15 @@
+\DocumentMetadata{}
+\ExplSyntaxOn
+\pdfmanagement_add:nnn { Page / Resources / ExtGState } { lvd } { << /ca~0.5 /CA~0.5 >> }
+\ExplSyntaxOff
+\documentclass[border=5pt]{standalone}
+\usepackage{lua-visual-debug}
+\usepackage{unicode-math}
+\lvdset{
+  glyph = {color={0 0 1 RG} width=0.12} 
+  onlyglyphs
+  opacity = {/lvd gs}
+}
+\begin{document}
+This is an example $\intop_a^b f(x) dx$
+\end{document}
