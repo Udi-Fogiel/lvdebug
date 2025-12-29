@@ -1,5 +1,5 @@
--- Copyright 2012-2026 Patrick Gundlach, patrick@gundla.ch
--- Copyright 2025-2026 Udi Fogiel, udi@udifogiel.com
+-- Copyright 2012-2025 Patrick Gundlach, patrick@gundla.ch
+-- Copyright 2025 Udi Fogiel, udi@udifogiel.com
 -- Public repository:
 -- https://github.com/Udi-Fogiel/lvdebug (issues/pull requests,...) Version: V1.0, 2025-12-29
 --

@@ -9,9 +9,13 @@ LaTeX:
 
     \usepackage{lua-visual-debug}
 
-or (plain)
+or plain:
 
     \input lua-visual-debug.sty
+
+or OpTeX:
+
+    \load[lua-visual-debug]
 
 
 
@@ -20,7 +24,7 @@ Requirements: The package has only been tested with LuaTeX and
   but other engines only show a warning message.
 
 
-Copyright 2012–2026 Patrick Gundlach (<patrick@gundla.ch>) and others (see Git information)
+Copyright 2012–2025 Patrick Gundlach (<patrick@gundla.ch>) and others (see Git information)
 
 Package version: 2025-12-29 v1.0
 
