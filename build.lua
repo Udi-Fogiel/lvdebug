@@ -64,7 +64,7 @@ function pre_release()
     call({"."}, "tag")
     call({"."}, "ctan", {config = options['config']})
     run(".", "zip -d " .. module .. ".zip " .. module .. ".tds.zip")
-    rm(".", "*.pdf")
+    rm("./doc", "*.pdf")
 end
 
 target_list["prerelease"] = { func = pre_release, 
