@@ -206,7 +206,7 @@ local function show_page_elements(parent)
 
 
     elseif head.id == PENALTY and params.penalty.show then
-    -- maybe add a default vlaue in case the function returns nil?
+    -- maybe add a default value in case the function returns nil?
       local color = params.penalty.colorfunc(head.penalty)
       local rectangle = node.new("whatsit","pdf_literal")
       rectangle.data = fmt("q %s 0 w 0 0 1 1 re B Q",color)
