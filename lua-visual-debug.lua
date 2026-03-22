@@ -181,9 +181,9 @@ local function show_page_elements(parent)
       end
       local pdfstring = node.new("whatsit","pdf_literal")
       local wd_bp = math_round(wd / number_sp_in_a_pdf_point,2)
-      if curdir[#curdir] == "rtl" then wd_bp = wd_bp * -1 end
 
       if parent.id == HLIST then
+        if curdir[#curdir] == "rtl" then wd_bp = wd_bp * -1 end
         pdfstring.data = fmt("q %s [0.2] 0 d 0.5 w 0 0 m %g 0 l S Q", color, wd_bp)
       else -- vlist
         pdfstring.data = fmt("q 0.1 G 0.1 w -0.5 0 m 0.5 0 l -0.5 %g m 0.5 %g l S [0.2] 0 d  0.5 w 0.25 0  m 0.25 %g l S Q",-wd_bp,-wd_bp,-wd_bp)
