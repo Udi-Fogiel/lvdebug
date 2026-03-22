@@ -165,7 +165,7 @@ local function show_page_elements(parent)
           end
       end
 
-    elseif head.id == GLUE and params.penalty.show then
+    elseif head.id == GLUE and params.glue.show then
       local head_spec = head.spec
       if not head_spec then
         head_spec = head
