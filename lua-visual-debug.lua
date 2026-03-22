@@ -109,10 +109,11 @@ local function show_page_elements(parent)
     elseif head.dir == "TRT" then
       insert(curdir,"rtl") has_dir=true
     end
+
     if head.id == HLIST or head.id == VLIST then
       local boxtype = node.type(head.id)
       local rule_width = params[boxtype].width
-      local wd = math_round(head.width                  / number_sp_in_a_pdf_point - rule_width     ,2)
+      local wd = math_round(head.width                  / number_sp_in_a_pdf_point ,2)
       local ht = math_round((head.height + head.depth)  / number_sp_in_a_pdf_point - rule_width / 2 ,2)
       local dp = math_round(head.depth                  / number_sp_in_a_pdf_point - rule_width / 2 ,2)
 
@@ -124,10 +125,10 @@ local function show_page_elements(parent)
         if curdir[#curdir] == "rtl" then factor = -1 end
         if head.id == HLIST then -- hbox
           rectangle.data = fmt("q %s %s %g w %g %g %g %g re s Q", 
-            params.opacity,params.hlist.color, rule_width, -factor*rule_width / 2, -dp, factor*wd, ht)
+            params.opacity,params.hlist.color, rule_width, 0, -dp, factor*wd, ht)
         else
           rectangle.data = fmt("q %s %s %g w %g %g %g %g re s Q", 
-            params.opacity,params.vlist.color, rule_width, -factor*rule_width / 2, 0, factor*wd, -ht)
+            params.opacity,params.vlist.color, rule_width, 0, 0, factor*wd, -ht)
         end
         head.list = insert_before(head.list,head.list,rectangle)
       end
@@ -214,7 +215,7 @@ local function show_page_elements(parent)
     
     elseif head.id == GLYPH and params.glyph.show then
       local rule_width = params.glyph.width
-      local wd = -math_round(head.width                 / number_sp_in_a_pdf_point - rule_width     ,2)
+      local wd = -math_round(head.width                 / number_sp_in_a_pdf_point ,2)
       local ht = math_round((head.height + head.depth)  / number_sp_in_a_pdf_point - rule_width / 2 ,2)
       local dp = math_round(head.depth                  / number_sp_in_a_pdf_point - rule_width / 2 ,2)
       local rectangle = node.new("whatsit", "pdf_literal")
@@ -223,10 +224,10 @@ local function show_page_elements(parent)
       local baseline = ""
       if head.depth ~= 0 and params.glyph.baseline then
         baseline = fmt("%g %g m %g %g l",
-          0, -rule_width / 2, factor*(wd-rule_width), -rule_width / 2)
+          0, -rule_width / 2, factor*(wd), -rule_width / 2)
       end      
       rectangle.data = fmt("q %s %s %g w %s %g %g %g %g re s Q",
-        params.opacity, params.glyph.color, rule_width, baseline, -factor*rule_width / 2, -dp, factor*wd, ht)
+        params.opacity, params.glyph.color, rule_width, baseline, 0, -dp, factor*wd, ht)
       parent.list, head = insert_after(parent.list,head,rectangle)
     end
     
