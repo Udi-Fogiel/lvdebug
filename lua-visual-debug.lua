@@ -224,7 +224,7 @@ local function show_page_elements(parent)
       local baseline = ""
       if head.depth ~= 0 and params.glyph.baseline then
         baseline = fmt("%g %g m %g %g l",
-          0, -rule_width / 2, factor*wd, -rule_width / 2)
+          0, 0, factor*wd, 0)
       end      
       rectangle.data = fmt("q %s %s %g w %s %g %g %g %g re s Q",
         params.opacity, params.glyph.color, rule_width, baseline, 0, -dp, factor*wd, ht)
