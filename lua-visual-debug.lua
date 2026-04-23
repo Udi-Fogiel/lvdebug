@@ -99,10 +99,7 @@ local show_page_elements
 
 local function show_page_elements(parent)
   local dirstack = {}
-  local currdir = 0
-  if parent.id == HLIST then
-      currdir = parent.direction
-  end
+  local currdir = parent.direction
   local head = parent.list
   while head do
 
@@ -189,13 +186,13 @@ local function show_page_elements(parent)
       local color = head.kern < 0 and params.kern.negativecolor
         or params.kern.color
       local k = math_round(head.kern / number_sp_in_a_pdf_point,2)
+      local factor = 1-2*currdir
       if parent.id == HLIST then
-        local factor = 1-2*currdir
         rectangle.data = fmt("q %s %s 0 w 0 0 %g %g re B Q",
           params.opacity, color, factor*k, params.kern.width)
       else
         rectangle.data = fmt("q %s %s 0 w 0 0 %g %g re B Q",
-          params.opacity, color, params.kern.width, -k)
+          params.opacity, color, factor*params.kern.width, -k)
       end
       parent.list = insert_before(parent.list,head,rectangle)
 
@@ -204,10 +201,7 @@ local function show_page_elements(parent)
     -- maybe add a default value in case the function returns nil?
       local color = params.penalty.colorfunc(head.penalty)
       local rectangle = node.new("whatsit","pdf_literal")
-      local factor = 1
-      if parent.id == HLIST then
-        factor = 1-2*currdir
-      end
+      local factor = 1-2*currdir
       rectangle.data = fmt("q %s 0 w 0 0 %s 1 re B Q",color,factor)
       parent.list = insert_before(parent.list,head,rectangle)
     
