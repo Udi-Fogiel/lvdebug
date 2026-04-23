@@ -184,12 +184,15 @@ local function show_page_elements(parent)
         color = "1 0 1 RG"
       end
       local wd_bp = to_bp(wd)
+      local f = 1 - 2 * currdir
       local data
       if parent.id == HLIST then
-        data = fmt("q %s [0.2] 0 d 0.5 w 0 0 m %g 0 l S Q", color, wd_bp * (1 - 2 * currdir))
+        data = fmt("q %s [0.2] 0 d 0.5 w 0 0 m %g 0 l S Q", color, wd_bp * f)
       else
-        data = fmt("q 0.1 G 0.1 w -0.5 0 m 0.5 0 l -0.5 %g m 0.5 %g l S [0.2] 0 d 0.5 w 0.25 0 m 0.25 %g l S Q",
-          -wd_bp, -wd_bp, -wd_bp)
+        local dash  = 0.25 * f
+        data = fmt("q 0.1 G 0.1 w -0.5 0 m 0.5 0 l -0.5 %g m %g %g l S [0.2] 0 d 0.5 w %g 0 m %g %g l S Q",
+          -wd_bp, tick, -wd_bp,
+          dash, dash, -wd_bp)
       end
       parent.list = insert_literal_before(parent.list, head, data)
       
