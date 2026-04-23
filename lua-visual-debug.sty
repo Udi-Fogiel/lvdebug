@@ -13,7 +13,10 @@
   \ifluatex
    \input atbegshi.sty\relax
    \directlua{
-     require("lua-visual-debug-keys")   
+     local resolved = kpse.find_file("luakeyval.lua")
+     if resolved then
+         require("lua-visual-debug-keys")
+     end  
      lvd = require("lua-visual-debug")}
    \AtBeginShipout {\directlua{lvd.show_page_elements(tex.box["AtBeginShipoutBox"])}}%
    \AtBeginShipoutInit
@@ -23,9 +26,12 @@
 \else
   \ifluatex
     \directlua{
-      require("lua-visual-debug-keys")
-      local lvd = require("lua-visual-debug")
-      luatexbase.add_to_callback('pre_shipout_filter', lvd.show_page_elements, 'lvd')
+      local resolved = kpse.find_file("luakeyval.lua")
+      if resolved then
+          require("lua-visual-debug-keys")
+      end
+      local lvd = require("lua-visual-debug").show_page_elements
+      luatexbase.add_to_callback('pre_shipout_filter', lvd, 'lvd')
     }
   \else
     \PackageWarning{lua-visual-debug}{You are using this package without LuaTeX. This is not supported, so you don't get any visual debugging.}

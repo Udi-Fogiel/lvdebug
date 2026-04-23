@@ -1,7 +1,7 @@
 -- Copyright 2012-2025 Patrick Gundlach, patrick@gundla.ch
 -- Copyright 2025 Udi Fogiel, udi@udifogiel.com
 -- Public repository:
--- https://github.com/Udi-Fogiel/lvdebug (issues/pull requests,...) Version: V1.0, 2025-12-29
+-- https://github.com/Udi-Fogiel/lvdebug (issues/pull requests,...) Version: V1.1, 2026-04-24
 --
 -- Permission is hereby granted, free of charge, to any person obtaining a copy
 -- of this software and associated documentation files (the "Software"), to deal

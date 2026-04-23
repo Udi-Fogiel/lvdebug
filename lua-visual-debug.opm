@@ -1,8 +1,11 @@
 
-\_codedecl \lvdset {Visual debugging <1.0, 2025-12-29>}
+\_codedecl \lvdset {Visual debugging <1.1, 2026-04-24>}
 
 \_directlua{
-  require("lua-visual-debug-keys")
+  local resolved = kpse.find_file("luakeyval.lua")
+  if resolved then
+      require("lua-visual-debug-keys")
+  end
   local lvd = require("lua-visual-debug")
   callback.add_to_callback('pre_shipout_filter', lvd.show_page_elements, 'lvd')
 }

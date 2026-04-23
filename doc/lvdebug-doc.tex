@@ -29,7 +29,7 @@ Other items are marked as well: kerns, hyphenation points and penalties.
 When you load the package \texttt{lua-visual-debug} in your Lua\LaTeX\ document 
 (or use \verb|\input lua-visual-debug.sty| in plain \TeX, or \verb|\load[lua-visual-debug]| in OP\TeX),
 Lua\TeX\ will highlight boxes, penalties, glues and kerns in the PDF.
-This package requires you to process the document with Lua\TeX\ (plain, \LaTeX or OP\TeX formats).
+This package requires you to process the document with Lua\TeX\ (plain, \LaTeX\ or OP\TeX\ formats).
 
 \section{A \LaTeX\ example}
 \lstinputlisting[language=tex]{sample.tex}
@@ -68,7 +68,8 @@ A strut box (zero width box) is marked with a red rule:
 \newpage
 
 \section{Configuration}
-The \verb|\lvdset| macro modifies the markers described in Section~\ref{sec:how_to_interpret_the_markers}.
+If the \texttt{luakeyval} package is installed, then you can use the
+\verb|\lvdset| macro modifies the markers described in Section~\ref{sec:how_to_interpret_the_markers}.
 It accepts a list of space-separated \texttt{key/val} pairs. Most keys accept nested \texttt{key/val} pairs 
 enclosed in curly braces. PDF operators (for \texttt{color}, \texttt{negative\_color}, and \texttt{opacity}) 
 must be enclosed in curly braces, e.g., \verb|\lvdset{glyph={color={1 0 0 RG}}}|.
@@ -144,6 +145,13 @@ An example of the usage of the keys is
 \noindent which yields \vspace{5mm}
 
 \noindent \includegraphics[width=\textwidth]{sample-keys.pdf}
+
+You can also access and assign the parameters from lua with the \texttt{params} table.
+For example
+\begin{verbatim}
+local params = require('lua-visual-debug').params
+params.hlist.color = "1 0 0 RG"
+\end{verbatim}
 
 
 \section{Copying}
