@@ -69,6 +69,7 @@ local GLYPH = node.id("glyph")
 local fmt = string.format
 local floor = math.floor
 local insert = table.insert
+local table_remove = table.remove
 local insert_after = node.insert_after
 local insert_before = node.insert_before
 
@@ -87,6 +88,8 @@ local params = {
     opacity = ""
 }
 
+-- Helpers
+
 local function math_round(num, idp)
   if idp and idp>0 then
     local mult = 10^idp
@@ -95,138 +98,136 @@ local function math_round(num, idp)
   return floor(num + 0.5)
 end
 
+local function new_literal(data)
+  local n = node.new("whatsit", "pdf_literal")
+  n.data = data
+  return n
+end
+
+local function insert_literal_before(list, target, data)
+  return insert_before(list, target, new_literal(data))
+end
+
+local function to_bp(sp)
+  return math_round(sp / number_sp_in_a_pdf_point, 2)
+end
+
+local function pdf_rect(opacity, color, lw, x, y, w, h, mode)
+  -- mode: "s" = stroke, "B" = fill+stroke
+  return fmt("q %s %s %g w %g %g %g %g re %s Q",
+    opacity, color, lw, x, y, w, h, mode or "s")
+end
+
 local show_page_elements
 
 local function show_page_elements(parent)
+  
   local dirstack = {}
   local currdir = parent.direction
   local head = parent.list
+  
   while head do
 
     if head.id == HLIST or head.id == VLIST then
       local boxtype = node.type(head.id)
-      local rule_width = params[boxtype].width
-      local wd = math_round(head.width                  / number_sp_in_a_pdf_point ,2)
-      local ht = math_round((head.height + head.depth)  / number_sp_in_a_pdf_point ,2)
-      local dp = math_round(head.depth                  / number_sp_in_a_pdf_point ,2)
-
-      -- recurse into the contents of the box
+      local p = params[boxtype]
       show_page_elements(head)
-      if params[boxtype].show then
-        local rectangle = node.new("whatsit","pdf_literal")
-        local factor = 1-2*head.direction
+      if p.show then
+        local wd = to_bp(head.width)
+        local dp = to_bp(head.depth)
+        local ht = to_bp(head.height + head.depth)
+        local f  = 1 - 2 * head.direction
+        local x, y, w, h
         if head.id == HLIST then
-          rectangle.data = fmt("q %s %s %g w %g %g %g %g re s Q", 
-            params.opacity,params.hlist.color, rule_width, 0, -dp, factor*wd, ht)
+          x, y, w, h = 0, -dp, f * wd, ht
         else
-          rectangle.data = fmt("q %s %s %g w %g %g %g %g re s Q", 
-            params.opacity,params.vlist.color, rule_width, 0, 0, factor*wd, -ht)
+          x, y, w, h = 0,   0, f * wd, -ht
         end
-        head.list = insert_before(head.list,head.list,rectangle)
+        head.list = insert_before(head.list, head.list,
+          new_literal(fmt("q %s %s %g w %g %g %g %g re s Q",
+            params.opacity, p.color, p.width, x, y, w, h)))
       end
-
+    
     elseif head.id == RULE and params.rule.show then
-      local show_rule = node.new("whatsit","pdf_literal")
-      if head.width == running_glue_dimen or head.height == running_glue_dimen or head.depth == running_glue_dimen then
-        -- ignore for now -- these rules are stretchable
-      else
-        local dp = math_round( head.depth / number_sp_in_a_pdf_point  ,2)
-        local ht = math_round( head.height / number_sp_in_a_pdf_point ,2)
-        show_rule.data =  fmt("q %s %s %g w 0 %g m 0 %g l S Q",
-          params.opacity,params.rule.color, params.rule.width, -dp, ht)
+      if head.width ~= running_glue_dimen
+       and head.height ~= running_glue_dimen
+       and head.depth ~= running_glue_dimen then
+        local dp = to_bp(head.depth)
+        local ht = to_bp(head.height)
+        parent.list = insert_literal_before(parent.list, head,
+          fmt("q %s %s %g w 0 %g m 0 %g l S Q", params.opacity,
+            params.rule.color, params.rule.width, -dp, ht))
       end
-      parent.list = insert_before(parent.list,head,show_rule)
-
-
+    
     elseif head.id == DISC and params.disc.show then
-      local hyphen_marker = node.new("whatsit","pdf_literal")
-      hyphen_marker.data = fmt("q %s %s %g w 0 -1 m 0 0 l S Q",
-        params.opacity,params.disc.color, params.disc.width)
-      parent.list = insert_before(parent.list,head,hyphen_marker)
-
+      parent.list = insert_literal_before(parent.list, head,
+        fmt("q %s %s %g w 0 -1 m 0 0 l S Q",
+          params.opacity, params.disc.color, params.disc.width))
+    
     elseif head.id == DIR then
-      local mode = string.sub(head.dir,1,1)
-      local texdir = string.sub(head.dir,2,4)
-      local ldir
-      if texdir == "TLT" then ldir = 0 else ldir = 1 end
-      if mode == "+" then
+      if head.subtype == 0 then
           insert(dirstack,currdir)
-          currdir = ldir
-      elseif mode == "-" and #dirstack > 0 then
-          currdir = table.remove(dirstack)
+          currdir = head.direction
+      elseif #dirstack > 0 then
+          currdir = table_remove(dirstack)
       end
 
     elseif head.id == GLUE and params.glue.show then
-      local head_spec = head.spec
-      if not head_spec then
-        head_spec = head
-      end
-      local wd = head_spec.width
+      local spec = head.spec or head
+      local wd = spec.width
       local color = "0.5 G"
-      if parent.glue_sign == 1 and parent.glue_order == head_spec.stretch_order then
-        wd = wd + parent.glue_set * head_spec.stretch
+      if parent.glue_sign == 1 and parent.glue_order == spec.stretch_order then
+        wd = wd + parent.glue_set * spec.stretch
         color = "0 0 1 RG"
-      elseif parent.glue_sign == 2 and parent.glue_order == head_spec.shrink_order then
-        wd = wd - parent.glue_set * head_spec.shrink
+      elseif parent.glue_sign == 2 and parent.glue_order == spec.shrink_order then
+        wd = wd - parent.glue_set * spec.shrink
         color = "1 0 1 RG"
       end
-      local pdfstring = node.new("whatsit","pdf_literal")
-      local wd_bp = math_round(wd / number_sp_in_a_pdf_point,2)
-
+      local wd_bp = to_bp(wd)
+      local data
       if parent.id == HLIST then
-        wd_bp = wd_bp * (1-2*currdir)
-        pdfstring.data = fmt("q %s [0.2] 0 d 0.5 w 0 0 m %g 0 l S Q", color, wd_bp)
-      else -- vlist
-        pdfstring.data = fmt("q 0.1 G 0.1 w -0.5 0 m 0.5 0 l -0.5 %g m 0.5 %g l S [0.2] 0 d  0.5 w 0.25 0  m 0.25 %g l S Q",-wd_bp,-wd_bp,-wd_bp)
-      end
-      parent.list = insert_before(parent.list,head,pdfstring)
-
-    elseif head.id == KERN and params.kern.show then
-      local rectangle = node.new("whatsit","pdf_literal")
-      local color = head.kern < 0 and params.kern.negativecolor
-        or params.kern.color
-      local k = math_round(head.kern / number_sp_in_a_pdf_point,2)
-      local factor = 1-2*currdir
-      if parent.id == HLIST then
-        rectangle.data = fmt("q %s %s 0 w 0 0 %g %g re B Q",
-          params.opacity, color, factor*k, params.kern.width)
+        data = fmt("q %s [0.2] 0 d 0.5 w 0 0 m %g 0 l S Q", color, wd_bp * (1 - 2 * currdir))
       else
-        rectangle.data = fmt("q %s %s 0 w 0 0 %g %g re B Q",
-          params.opacity, color, factor*params.kern.width, -k)
+        data = fmt("q 0.1 G 0.1 w -0.5 0 m 0.5 0 l -0.5 %g m 0.5 %g l S [0.2] 0 d 0.5 w 0.25 0 m 0.25 %g l S Q",
+          -wd_bp, -wd_bp, -wd_bp)
       end
-      parent.list = insert_before(parent.list,head,rectangle)
-
+      parent.list = insert_literal_before(parent.list, head, data)
+      
+    elseif head.id == KERN and params.kern.show then
+      local color = head.kern < 0 and params.kern.negativecolor or params.kern.color
+      local k = to_bp(head.kern)
+      local f = 1 - 2 * currdir
+      local w, h
+      if parent.id == HLIST then
+        w, h = f * k, params.kern.width
+      else
+        w, h = f * params.kern.width, -k
+      end
+      parent.list = insert_literal_before(parent.list, head,
+        fmt("q %s %s 0 w 0 0 %g %g re B Q", params.opacity, color, w, h))
 
     elseif head.id == PENALTY and params.penalty.show then
-    -- maybe add a default value in case the function returns nil?
-      local color = params.penalty.colorfunc(head.penalty)
-      local rectangle = node.new("whatsit","pdf_literal")
-      local factor = 1-2*currdir
-      rectangle.data = fmt("q %s 0 w 0 0 %s 1 re B Q",color,factor)
-      parent.list = insert_before(parent.list,head,rectangle)
+      parent.list = insert_literal_before(parent.list, head,
+        fmt("q %s 0 w 0 0 %g 1 re B Q",
+          params.penalty.colorfunc(head.penalty), 1 - 2 * currdir))    
     
     elseif head.id == GLYPH and params.glyph.show then
-      local rule_width = params.glyph.width
-      local wd = -math_round(head.width                 / number_sp_in_a_pdf_point ,2)
-      local ht = math_round((head.height + head.depth)  / number_sp_in_a_pdf_point ,2)
-      local dp = math_round(head.depth                  / number_sp_in_a_pdf_point ,2)
-      local rectangle = node.new("whatsit", "pdf_literal")
-      local factor = 1-2*currdir
-      local baseline = ""
-      if head.depth ~= 0 and params.glyph.baseline then
-        baseline = fmt("%g %g m %g %g l",
-          0, 0, factor*wd, 0)
-      end      
-      rectangle.data = fmt("q %s %s %g w %s %g %g %g %g re s Q",
-        params.opacity, params.glyph.color, rule_width, baseline, 0, -dp, factor*wd, ht)
-      parent.list, head = insert_after(parent.list,head,rectangle)
+      local p = params.glyph
+      local f = 1 - 2 * currdir
+      local wd = -to_bp(head.width)
+      local ht =  to_bp(head.height + head.depth)
+      local dp =  to_bp(head.depth)
+      local baseline = (head.depth ~= 0 and p.baseline)
+        and fmt("%g %g m %g %g l", 0, 0, f * wd, 0) or ""
+      parent.list, head = insert_after(parent.list, head,
+        new_literal(fmt("q %s %s %g w %s %g %g %g %g re s Q",
+          params.opacity, p.color, p.width, baseline, 0, -dp, f * wd, ht)))
     end
     
     head = head.next
   end
   return true
 end
-
 
 return {
   show_page_elements = show_page_elements,
