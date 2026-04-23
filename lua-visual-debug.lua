@@ -95,20 +95,16 @@ local function math_round(num, idp)
   return floor(num + 0.5)
 end
 
-local curdir = {}
-
 local show_page_elements
 
 local function show_page_elements(parent)
+  local dirstack = {}
+  local currdir = 0
+  if parent.id == HLIST then
+      currdir = parent.direction
+  end
   local head = parent.list
   while head do
-    local has_dir = false
-    if head.dir == "TLT" then
-      insert(curdir,"ltr")
-      has_dir=true
-    elseif head.dir == "TRT" then
-      insert(curdir,"rtl") has_dir=true
-    end
 
     if head.id == HLIST or head.id == VLIST then
       local boxtype = node.type(head.id)
@@ -121,9 +117,8 @@ local function show_page_elements(parent)
       show_page_elements(head)
       if params[boxtype].show then
         local rectangle = node.new("whatsit","pdf_literal")
-        local factor = 1
-        if curdir[#curdir] == "rtl" then factor = -1 end
-        if head.id == HLIST then -- hbox
+        local factor = 1-2*head.direction
+        if head.id == HLIST then
           rectangle.data = fmt("q %s %s %g w %g %g %g %g re s Q", 
             params.opacity,params.hlist.color, rule_width, 0, -dp, factor*wd, ht)
         else
@@ -156,14 +151,12 @@ local function show_page_elements(parent)
       local mode = string.sub(head.dir,1,1)
       local texdir = string.sub(head.dir,2,4)
       local ldir
-      if texdir == "TLT" then ldir = "ltr" else ldir = "rtl" end
+      if texdir == "TLT" then ldir = 0 else ldir = 1 end
       if mode == "+" then
-          insert(curdir,ldir)
-      elseif mode == "-" then
-          local x = table.remove(curdir)
-          if x ~= ldir then
-              print(fmt("paragraph direction incorrect, found %s, expected %s",ldir,x))
-          end
+          insert(dirstack,currdir)
+          currdir = ldir
+      elseif mode == "-" and #dirstack > 0 then
+          currdir = table.remove(dirstack)
       end
 
     elseif head.id == GLUE and params.glue.show then
@@ -184,7 +177,7 @@ local function show_page_elements(parent)
       local wd_bp = math_round(wd / number_sp_in_a_pdf_point,2)
 
       if parent.id == HLIST then
-        if curdir[#curdir] == "rtl" then wd_bp = wd_bp * -1 end
+        wd_bp = wd_bp * (1-2*currdir)
         pdfstring.data = fmt("q %s [0.2] 0 d 0.5 w 0 0 m %g 0 l S Q", color, wd_bp)
       else -- vlist
         pdfstring.data = fmt("q 0.1 G 0.1 w -0.5 0 m 0.5 0 l -0.5 %g m 0.5 %g l S [0.2] 0 d  0.5 w 0.25 0  m 0.25 %g l S Q",-wd_bp,-wd_bp,-wd_bp)
@@ -197,8 +190,9 @@ local function show_page_elements(parent)
         or params.kern.color
       local k = math_round(head.kern / number_sp_in_a_pdf_point,2)
       if parent.id == HLIST then
+        local factor = 1-2*currdir
         rectangle.data = fmt("q %s %s 0 w 0 0 %g %g re B Q",
-          params.opacity, color, k, params.kern.width)
+          params.opacity, color, factor*k, params.kern.width)
       else
         rectangle.data = fmt("q %s %s 0 w 0 0 %g %g re B Q",
           params.opacity, color, params.kern.width, -k)
@@ -210,7 +204,11 @@ local function show_page_elements(parent)
     -- maybe add a default value in case the function returns nil?
       local color = params.penalty.colorfunc(head.penalty)
       local rectangle = node.new("whatsit","pdf_literal")
-      rectangle.data = fmt("q %s 0 w 0 0 1 1 re B Q",color)
+      local factor = 1
+      if parent.id == HLIST then
+        factor = 1-2*currdir
+      end
+      rectangle.data = fmt("q %s 0 w 0 0 %s 1 re B Q",color,factor)
       parent.list = insert_before(parent.list,head,rectangle)
     
     elseif head.id == GLYPH and params.glyph.show then
@@ -219,8 +217,7 @@ local function show_page_elements(parent)
       local ht = math_round((head.height + head.depth)  / number_sp_in_a_pdf_point ,2)
       local dp = math_round(head.depth                  / number_sp_in_a_pdf_point ,2)
       local rectangle = node.new("whatsit", "pdf_literal")
-      local factor = 1
-      if curdir[#curdir] == "rtl" then factor = -1 end
+      local factor = 1-2*currdir
       local baseline = ""
       if head.depth ~= 0 and params.glyph.baseline then
         baseline = fmt("%g %g m %g %g l",
@@ -231,9 +228,6 @@ local function show_page_elements(parent)
       parent.list, head = insert_after(parent.list,head,rectangle)
     end
     
-    if has_dir then
-      table.remove(curdir)
-    end
     head = head.next
   end
   return true
