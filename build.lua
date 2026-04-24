@@ -46,15 +46,15 @@ function update_tag(file,content,tagname,tagdate)
       "Version: V" .. tagname .. ", " .. tagdate)
   elseif string.match(file, "%.sty$") then
     return string.gsub(content,
-      "} %[%d%d%d%d%-%d%d%-%d%d v%d+%.%d+\n",
-      "} [" .. tagdate .. " v" .. tagname .. "\n")
+      "}%[%d%d%d%d%-%d%d%-%d%d v%d+%.%d+\n",
+      "}[" .. tagdate .. " v" .. tagname .. "\n")
   elseif string.match(file, "%.md$") then
     return string.gsub(content,
       "Package version: %d%d%d%d%-%d%d%-%d%d v%d+%.%d+\n",
       "Package version: " .. tagdate .. " v" .. tagname .. "\n")
   elseif string.match(file, "%.tex$") then
     return string.gsub(content,
-      "The lua-visual-debug package (V%d+%.%d+)",
+      "The lua%-visual%-debug package %(V%d+%.%d+%)",
       "The lua-visual-debug package (V" .. tagname .. ")")
 
   end
